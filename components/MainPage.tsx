@@ -5,6 +5,7 @@ import { getBGTime } from "@/services/utils";
 export default function MainPage() {
     const mainPageRef = useRef<HTMLDivElement>(null);
     const changeToGame = useGlobalState((state)=>state.setStartGame);
+    
 
     return (<div ref={mainPageRef} className="animate__animated" style={{backgroundImage: `url("/cloudscapes/${getBGTime()}/orig.png")`}} id="main_page">
         <h1>Welcome to Parakram!</h1>
