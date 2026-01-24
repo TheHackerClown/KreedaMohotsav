@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Press_Start_2P } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+
+const pressStart2P = Press_Start_2P({
+  variable: "--font-press-start-2p",
   subsets: ["latin"],
+  weight: "400",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
-  title: "Prakram 2.0 Sports Event",
-  description: "The Ultimate Event of NFSU Sport Club",
+  title:  "PARAKRAM",
+  description: "NFSU's Sport Club",
 };
 
 export default function RootLayout({
@@ -25,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${pressStart2P.className} antialiased`}
       >
         {children}
       </body>
