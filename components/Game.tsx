@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
-import Matter, { Composite } from "matter-js";
-import MatterWrap from "matter-wrap";
+import { useEffect, useRef, useState } from "react"
+import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
+
 
 export default function Game({ onReady }: { onReady?: () => void }) {
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -15,14 +15,14 @@ export default function Game({ onReady }: { onReady?: () => void }) {
     const [showMobileControls, setShowMobileControls] = useState(false)
     const [showRotatePrompt, setShowRotatePrompt] = useState(false)
     const activeGame = useGlobalState((state) => state.startGame);
-
+     const bgm_music = useGlobalState((state)=>state.BGMusic);
+     const val = bgm_music.play();
+    bgm_music.fade(0, 0.01, 500, val);
     useEffect(() => {
-
-        Matter.use(MatterWrap);
         // detect mobile (simple UA + touch check)
         const ua = typeof navigator !== "undefined" ? navigator.userAgent : ""
         const isTouch = typeof window !== "undefined" && "ontouchstart" in window
-        if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua) || isTouch) setShowMobileControls(true)
+        if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua) || isTouch) setShowMobileControls(true);
 
         // Check orientation and show rotate prompt if in portrait mode on mobile
         const checkOrientation = () => {
@@ -93,9 +93,11 @@ export default function Game({ onReady }: { onReady?: () => void }) {
         runnerRef.current = runner
 
         if (activeGame) {
-        Matter.Render.run(render)
-        Matter.Runner.run(runner, engine)
+            Matter.Render.run(render)
+            Matter.Runner.run(runner, engine)
         }
+
+        
         
         
         // continuous force while keys are held
@@ -155,6 +157,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
             Matter.Events.off(engine, "beforeUpdate", beforeUpdate)
             Matter.Runner.stop(runner)
             Matter.Render.stop(render)
+            bgm_music.stop();
             if (render.canvas && render.canvas.parentNode) render.canvas.parentNode.removeChild(render.canvas)
             Matter.Composite.clear(engine.world, false)
             Matter.Engine.clear(engine)
@@ -188,15 +191,15 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                         zIndex: 9999,
                         color: "white",
                         textAlign: "center",
-                        padding: 20,
+                        padding: 16,
                     }}
                 >
-                    <div style={{ fontSize: 64, marginBottom: 20 }}>📱 ➜ 🔄</div>
-                    <h2 style={{ fontSize: 24, marginBottom: 10, fontWeight: "bold" }}>
+                    <div style={{ fontSize: "clamp(36px, 6vw, 64px)", marginBottom: 16 }}>📱 ➜ 🔄</div>
+                    <h2 style={{ fontSize: "clamp(16px, 3.2vw, 24px)", marginBottom: 10, fontWeight: "bold" }}>
                         Please Rotate Your Device
                     </h2>
-                    <p style={{ fontSize: 16, opacity: 0.9 }}>
-                        This game is designed to be played in landscape mode (16:9)
+                    <p style={{ fontSize: "clamp(12px, 2.5vw, 16px)", opacity: 0.9 }}>
+                        This Website is designed to be viewed in landscape mode (16:9)
                     </p>
                 </div>
             )}
@@ -208,7 +211,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                     <button
                         aria-label="Move left"
                         className = "custom_button"
-                        style={{ left: 16 }}
+                        style={{ left: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
                         onMouseDown={startLeft}
                         onMouseUp={stopLeft}
                         onMouseLeave={stopLeft}
@@ -224,7 +227,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                     <button
                         aria-label="Move right"
                         className = "custom_button"
-                        style={{ right: 16 }}
+                        style={{ right: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
                         onMouseDown={startRight}
                         onMouseUp={stopRight}
                         onMouseLeave={stopRight}
