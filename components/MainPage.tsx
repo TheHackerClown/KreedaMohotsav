@@ -25,8 +25,10 @@ export default function MainPage() {
        
         <div className="flex flex-col items-center justify-center gap-1 sm:gap-2">
             <h1 className="text-[10px] sm:text-sm md:text-lg">Parakram Presents</h1>
-            <h2 className="text-[9px] sm:text-xs md:text-base">Kreeda Mohotsav 2.0</h2>
+            <h2 className="text-[12px] sm:text-s md:text-2xl">Kreeda Mohotsav 2.0</h2>
+            <br />
             <EnterButton onClick={clickHandle}/>
+            <br />
             <MuteButton />
         </div>
     </div>);

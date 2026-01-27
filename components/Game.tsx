@@ -12,12 +12,22 @@ export default function Game({ onReady }: { onReady?: () => void }) {
     const renderRef = useRef<Matter.Render | null>(null)
     const runnerRef = useRef<Matter.Runner | null>(null)
     const keysRef = useRef({ left: false, right: false, up: false, down: false })
+    const cutsceneDoneRef = useRef(false)
     const [showMobileControls, setShowMobileControls] = useState(false)
     const [showRotatePrompt, setShowRotatePrompt] = useState(false)
-    const activeGame = useGlobalState((state) => state.startGame);
-     const bgm_music = useGlobalState((state)=>state.BGMusic);
-     const val = bgm_music.play();
+    const activeGame = useGlobalState((state) => state.startGame) ?? true; // Default to true if not set
+    const bgm_music = useGlobalState((state)=>state.BGMusic);
+    const cutsceneDone = useGlobalState((state) => state.cutsceneDone);
+    const setCutsceneDone = useGlobalState((state) => state.setCutsceneDone);
+    const bgWallpaper = useGlobalState((state)=>state.bgWallpaper);
+    const val = bgm_music.play();
     bgm_music.fade(0, 0.01, 500, val);
+
+    // Update ref whenever cutsceneDone changes
+    useEffect(() => {
+        cutsceneDoneRef.current = cutsceneDone;
+    }, [cutsceneDone]);
+
     useEffect(() => {
         // detect mobile (simple UA + touch check)
         const ua = typeof navigator !== "undefined" ? navigator.userAgent : ""
@@ -58,7 +68,9 @@ export default function Game({ onReady }: { onReady?: () => void }) {
         })
         renderRef.current = render
 
-        const ball = Matter.Bodies.circle(150, 50, 20, {
+        // Ball positioned at bottom-left to avoid mobile controls
+        const ball = Matter.Bodies.circle(0, -height*0.01 , 20, {
+            label: "ball",
             restitution: 1,
             friction: 0.1,
             frictionAir: 0.05,
@@ -72,16 +84,31 @@ export default function Game({ onReady }: { onReady?: () => void }) {
             }
             
         })
+
+
         ballRef.current = ball
-        const ground = Matter.Bodies.rectangle(100, height-40, 100000, 200, {
+        const ground = Matter.Bodies.rectangle(100, height*2, 100000, 500, {
+            label: "ground",
             isStatic: true,
             friction: 1,
             restitution: 0,
-            
+            render: {
+                sprite: {
+                    texture: "/city/road.jpeg",
+                    xScale: 10,
+                    yScale: 10,
+                }
+            }
         })
 
         // walls to prevent leaving screen (we'll move these together with the ground)
-        const leftWall = Matter.Bodies.rectangle(width/8-width/2, height / 2, width/4, height, { isStatic: true })
+        const leftWall = Matter.Bodies.rectangle(-width/8-width/2, height*1.5, width/4, height*10, { 
+            isStatic: true,
+            render: {
+                fillStyle: "#D3D3D3",
+                opacity: 0.1
+            }
+        })
         
         // this will hold all world bodies for translation of ground and walls w.r.t ball movement
         const world_bodies = Matter.Composite.create(); 
@@ -90,24 +117,22 @@ export default function Game({ onReady }: { onReady?: () => void }) {
         Matter.Composite.add(engine.world, [ball, world_bodies])
 
         const runner = Matter.Runner.create()
-        runnerRef.current = runner
+        runnerRef.current = runner 
 
         if (activeGame) {
             Matter.Render.run(render)
-            Matter.Runner.run(runner, engine)
-        }
-
-        
-        
+            Matter.Runner.run(runner, engine);
+        }      
+        let cameraOffsetX: number
+        let cameraOffsetY: number
         
         // continuous force while keys are held
         const forceMagnitude = 0.002
         const beforeUpdate = () => {
             const b = ballRef.current
-            if (!b) return
+            if (!b || !renderRef.current) return
             if (keysRef.current.left) Matter.Body.applyForce(b, b.position, { x: -forceMagnitude, y: 0 })
             if (keysRef.current.right) Matter.Body.applyForce(b, b.position, { x: forceMagnitude, y: 0 })
-            if (keysRef.current.up) Matter.Body.applyForce(b, b.position, { x: 0, y: -forceMagnitude*0.2 })
             if (keysRef.current.down) Matter.Body.applyForce(b, b.position, { x: 0, y: forceMagnitude })
 
             // move the ground and walls in the opposite horizontal direction of the ball
@@ -115,12 +140,60 @@ export default function Game({ onReady }: { onReady?: () => void }) {
             const platformMoveFactor = 3 // tweak for responsiveness
             const dx = -b.velocity.x * platformMoveFactor
             try {
-                 if (world_bodies) Matter.Composite.translate(world_bodies, { x: dx, y: 0 })
-            } catch (e) {
+                 if (world_bodies && containerRef.current) { 
+                    Matter.Composite.translate(world_bodies, { x: dx, y: 0 });
+                    // also parallax background movement
+                    if (cutsceneDoneRef.current) {    
+                    const currentBGPos = containerRef.current.style.backgroundPositionX;
+                    const currentBGPosValue = currentBGPos ? parseFloat(currentBGPos) : 0;
+                    containerRef.current.style.backgroundPositionX = `${currentBGPosValue + dx * 0.5}px`;
+                    }
+                }
+            } catch {
                 // ignore translate errors
             }
+            
+            if (cutsceneDoneRef.current) {
+                    // After cutscene: lower-right offset
+                    cameraOffsetX = -width * 0.09
+                    cameraOffsetY = -height * 0.9
+            } else {
+                    // Before cutscene: cutscene hi hoga bhai
+                    cameraOffsetX = -width * 0.3
+                    cameraOffsetY = -height * 0.5
+            }
+
+            Matter.Render.lookAt(renderRef.current,cutsceneDoneRef.current ? {
+                    min: { x: b.position.x + cameraOffsetX, y: b.position.y + cameraOffsetY },
+                    max: { x: b.position.x + cameraOffsetX + width, y: b.position.y + cameraOffsetY + height }
+                } : { 
+                    min: { x: -width/2, y: height/2 },
+                    max: { x: width/2, y: height }
+                }
+            )
+
+            
+
         }
         Matter.Events.on(engine, "beforeUpdate", beforeUpdate)
+
+        Matter.Events.on(engine, "collisionStart", event => {
+            event.pairs.forEach(pair => {
+
+                const bodies = [pair.bodyA.label, pair.bodyB.label];
+
+                if (
+                !cutsceneDone && containerRef.current &&
+                bodies.includes("ball") &&
+                bodies.includes("ground")
+                ) {
+                setCutsceneDone(true);
+                containerRef.current.classList.remove("bg-cover");
+                containerRef.current.style.backgroundImage = `url("/crowd.jpg")`;
+                }
+            });
+            });
+
 
         // keyboard handlers
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -173,7 +246,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
 
 
     return (
-        <div id="game_container">
+        <div id="game_container" className="overflow-hidden">
             {/* Rotation Prompt Overlay for mobile devices */}
             {showRotatePrompt && (
                 <div
@@ -188,7 +261,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        zIndex: 9999,
+                        zIndex: 10,
                         color: "white",
                         textAlign: "center",
                         padding: 16,
@@ -204,7 +277,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                 </div>
             )}
 
-            <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+            <div ref={containerRef} className="bg-repeat-x bg-cover" style={{backgroundImage: `url("/Sky.png")`, width: "100%", height: "100%", position: "relative"}} />
 
             {showMobileControls && activeGame && (
                 <>
@@ -216,7 +289,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                         onMouseUp={stopLeft}
                         onMouseLeave={stopLeft}
                         onTouchStart={(e) => {
-                            e.preventDefault()
+                            e.stopPropagation()
                             startLeft()
                         }}
                         onTouchEnd={stopLeft}
@@ -232,7 +305,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                         onMouseUp={stopRight}
                         onMouseLeave={stopRight}
                         onTouchStart={(e) => {
-                            e.preventDefault()
+                            e.stopPropagation()
                             startRight()
                         }}
                         onTouchEnd={stopRight}

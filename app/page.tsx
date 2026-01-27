@@ -21,7 +21,7 @@ export default function Home() {
       {!activeGame && (
         <Countdown 
         title="DAY 1 COMING IN" 
-        destinationTime={"2026-09-20T09:00:00+05:30"}
+        destinationTime={"2026-02-18T09:00:00+05:30"}
         />
       )}
       

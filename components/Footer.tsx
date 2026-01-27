@@ -1,6 +1,6 @@
 export const Footer = () => {
   return (
-    <footer className="w-full pb-3 text-center relative bottom-0 ">
+    <footer className="w-full pb-3 text-center bottom-0" style={{zIndex:11}}>
       <p className="m-0 text-sm text-gray-400">
         Made with ❤ by{" "}
         <a

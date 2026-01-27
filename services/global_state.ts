@@ -4,6 +4,8 @@ import { getBGTime } from "@/services/utils";
 interface GlobalState {
     startGame: boolean;
     setStartGame: (value: boolean) => void;
+    cutsceneDone: boolean;
+    setCutsceneDone: (value: boolean) => void;
     loopMusic: boolean;
     bgWallpaper: string;
     BGMusic: Howl;
@@ -14,6 +16,8 @@ interface GlobalState {
 export const useGlobalState = create<GlobalState>((set)=>({
     startGame: false,
     setStartGame: (value: boolean) => set({startGame: value}),
+    cutsceneDone: false,
+    setCutsceneDone: (value: boolean) => set({cutsceneDone: value}),
     loopMusic: true,
     bgWallpaper: `/cloudscapes/${getBGTime()}/orig.png`,
     BGMusic: new Howl({
