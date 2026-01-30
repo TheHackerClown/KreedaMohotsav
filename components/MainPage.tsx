@@ -2,11 +2,14 @@ import { useGlobalState } from "@/services/global_state";
 import { useRef } from "react";
 import MuteButton from "@/components/MuteButton";
 import EnterButton from "@/components/EnterButton";
+import RuleBookButton from "@/components/RuleBook";
+
 
 export default function MainPage() {
     const mainPageRef = useRef<HTMLDivElement | null>(null);
     const changeToGame = useGlobalState((state)=>state.setStartGame);
     const bgWallpaper = useGlobalState((state)=>state.bgWallpaper);
+    const mobileDevice = useGlobalState((state)=>state.MobileControls);
 
     const clickHandle = () => {
       //Tab Change
@@ -22,7 +25,9 @@ export default function MainPage() {
     
 
     return (<div ref={mainPageRef} className="animate__animated text-white border-2 border-black flex flex-column items-center justify-around overflow-hidden z-3 w-full h-full bg-no-repeat bg-cover bg-center px-2 sm:px-4" style={{backgroundImage: `url("${bgWallpaper}")`}}>
-       
+        <div>
+            <button>Hehe</button>
+        </div>
         <div className="flex flex-col items-center justify-center gap-1 sm:gap-2">
             <h1 className="text-[10px] sm:text-sm md:text-lg">Parakram Presents</h1>
             <h2 className="text-[12px] sm:text-s md:text-2xl">Kreeda Mohotsav 2.0</h2>
@@ -30,6 +35,11 @@ export default function MainPage() {
             <EnterButton onClick={clickHandle}/>
             <br />
             <MuteButton />
+            <br />
+            <RuleBookButton />
+        </div>
+        <div>
+            <button>hehe</button>
         </div>
     </div>);
 }

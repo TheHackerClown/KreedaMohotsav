@@ -3,30 +3,28 @@ import Game from "@/components/Game";
 import MainPage from "@/components/MainPage";
 import { useGlobalState } from "@/services/global_state";
 import { useEffect } from "react";
-import Countdown from "@/components/Countdown";
-import { Footer } from "@/components/Footer";
 
 export default function Home() {
 
   const bgWallpaper = useGlobalState((state)=>state.bgWallpaper);
-  const activeGame = useGlobalState((state)=>state.startGame);
+  const setShowMobileControls = useGlobalState((state)=>state.setShowMobileControls);
+  useEffect(() => {
+    
+        // Mobile Check
+        const ua = typeof navigator !== "undefined" ? navigator.userAgent : ""
+        const isTouch = typeof window !== "undefined" && "ontouchstart" in window
+        if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua) || isTouch) setShowMobileControls(true);
+
+      }, []);
+  
   useEffect(() => {
     new Image().src = bgWallpaper;
-  }, []);
+  }, [bgWallpaper]);
 
   return (
     <div id="root_container">
-      <MainPage/>
-
-      {!activeGame && (
-        <Countdown 
-        title="DAY 1 COMING IN" 
-        destinationTime={"2026-02-18T09:00:00+05:30"}
-        />
-      )}
-      
+      <MainPage/>      
       <Game />
-      <Footer/>
     </div>
   );
 }

@@ -4,47 +4,79 @@ import { useEffect, useRef, useState } from "react"
 import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
 
-
-export default function Game({ onReady }: { onReady?: () => void }) {
+export default function Game() {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const ballRef = useRef<Matter.Body | null>(null)
-    const engineRef = useRef<Matter.Engine | null>(null)
     const renderRef = useRef<Matter.Render | null>(null)
-    const runnerRef = useRef<Matter.Runner | null>(null)
+    
+    // --- SENSOR STATES ---
+    const tiltRef = useRef(0);
+    const [permissionGranted, setPermissionGranted] = useState(false);
+    const [already_started_song, setAlreadyStartedSong] = useState<boolean>(false);
     const keysRef = useRef({ left: false, right: false, up: false, down: false })
-    const cutsceneDoneRef = useRef(false)
-    const [showMobileControls, setShowMobileControls] = useState(false)
-    const [showRotatePrompt, setShowRotatePrompt] = useState(false)
-    const activeGame = useGlobalState((state) => state.startGame) ?? true; // Default to true if not set
+    const showMobileControls = useGlobalState((state) => state.MobileControls);
+    
+    // REMOVED: showRotatePrompt state (Ab vertical allowed hai)
+    
+    const activeGame = useGlobalState((state) => state.startGame) ?? true;
     const bgm_music = useGlobalState((state)=>state.BGMusic);
-    const cutsceneDone = useGlobalState((state) => state.cutsceneDone);
-    const setCutsceneDone = useGlobalState((state) => state.setCutsceneDone);
-    const bgWallpaper = useGlobalState((state)=>state.bgWallpaper);
-    const val = bgm_music.play();
-    bgm_music.fade(0, 0.01, 500, val);
-
-    // Update ref whenever cutsceneDone changes
-    useEffect(() => {
-        cutsceneDoneRef.current = cutsceneDone;
-    }, [cutsceneDone]);
+    const loop_music = useGlobalState((state)=>state.loopMusic);
+    const [tilt_available, setTiltAvailable] = useState<boolean>(false);
 
     useEffect(() => {
-        // detect mobile (simple UA + touch check)
-        const ua = typeof navigator !== "undefined" ? navigator.userAgent : ""
-        const isTouch = typeof window !== "undefined" && "ontouchstart" in window
-        if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua) || isTouch) setShowMobileControls(true);
-
-        // Check orientation and show rotate prompt if in portrait mode on mobile
-        const checkOrientation = () => {
-            if (typeof window === "undefined") return
-            const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || isTouch
-            const isPortrait = window.innerHeight > window.innerWidth
-            setShowRotatePrompt(isMobile && isPortrait)
+        // Check if DeviceOrientationEvent is supported
+        if (typeof window !== 'undefined' && typeof (window as any).DeviceOrientationEvent !== 'undefined' && typeof (window as any).DeviceOrientationEvent.requestPermission === 'function') {
+            setTiltAvailable(true);
+        } else {
+            setTiltAvailable(false);
+        }}, [activeGame]);
+    
+    // Audio
+    useEffect(() => {
+        if (activeGame && loop_music && !already_started_song) {
+            setAlreadyStartedSong(true);
+            const val = bgm_music.play();
+            bgm_music.fade(0, 100, 500, val);
         }
+    }, []);
 
-        checkOrientation()
-        window.addEventListener("resize", checkOrientation)
-        window.addEventListener("orientationchange", checkOrientation)
+
+    // --- PERMISSION HANDLER ---
+    const requestMotionPermission = async () => {
+        if (typeof window !== 'undefined' && typeof (window as any).DeviceOrientationEvent !== 'undefined' && typeof (window as any).DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const response = await (window as any).DeviceOrientationEvent.requestPermission();
+                if (response === 'granted') {
+                    setPermissionGranted(true);
+                    enableSensors();
+                }
+            } catch (e) { console.error(e); }
+        } else {
+            setPermissionGranted(true);
+            enableSensors();
+        }
+    };
+
+    const enableSensors = () => {
+        window.addEventListener('deviceorientation', (event) => {
+            if (event.gamma !== null) {
+                console.log("Device Orientation granted.");
+                console.log(`Gamma: ${event.gamma}, Beta: ${event.beta}, Alpha: ${event.alpha}`);
+                // Portrait mode mein bhi Gamma (Left/Right tilt) sahi kaam karta hai
+                tiltRef.current = event.gamma / 45; 
+            }
+        });
+    };
+
+    // --- JUMP LOGIC ---
+    const handleJump = () => {
+        const b = ballRef.current;
+        if (!b) return;
+        if (Math.abs(b.velocity.y) > 2) return; 
+        Matter.Body.applyForce(b, b.position, { x: 0, y: -0.15 }); 
+    };
+
+    useEffect(() => {
 
         if (!containerRef.current) return
         
@@ -52,8 +84,7 @@ export default function Game({ onReady }: { onReady?: () => void }) {
         const height = containerRef.current.clientHeight || 400
 
         const engine = Matter.Engine.create()
-        engineRef.current = engine
-        engine.gravity.y = 0.98
+        engine.gravity.y = 1.2 
 
         const render = Matter.Render.create({
             element: containerRef.current,
@@ -64,17 +95,19 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                 wireframes: false,
                 background: "transparent",
                 pixelRatio: window.devicePixelRatio || 1,
+                hasBounds: true 
             },
         })
         renderRef.current = render
 
-        // Ball positioned at bottom-left to avoid mobile controls
-        const ball = Matter.Bodies.circle(0, -height*0.01 , 20, {
+        // --- BODIES ---
+        
+        const ball = Matter.Bodies.circle(150, 50, 20, {
             label: "ball",
-            restitution: 1,
-            friction: 0.1,
-            frictionAir: 0.05,
-            density: 0.002,
+            restitution: 0.5,    
+            friction: 0.01,      
+            frictionAir: 0.01,   
+            density: 0.005,      
             render: {
                 sprite: {
                     texture: "/soccer.png",
@@ -82,151 +115,93 @@ export default function Game({ onReady }: { onReady?: () => void }) {
                     yScale: 0.2,
                 }
             }
-            
         })
-
-
         ballRef.current = ball
-        const ground = Matter.Bodies.rectangle(100, height*2, 100000, 500, {
+
+        const ground = Matter.Bodies.rectangle(0, height, 100000, 200, {
             label: "ground",
             isStatic: true,
-            friction: 1,
-            restitution: 0,
-            render: {
-                sprite: {
-                    texture: "/city/road.jpeg",
-                    xScale: 10,
-                    yScale: 10,
-                }
-            }
-        })
+            friction: 0.1,
+            render: { visible: false }
+            })
+        Matter.Body.setPosition(ground, { x: 40000, y: height + 60 })
 
-        // walls to prevent leaving screen (we'll move these together with the ground)
-        const leftWall = Matter.Bodies.rectangle(-width/8-width/2, height*1.5, width/4, height*10, { 
-            isStatic: true,
-            render: {
-                fillStyle: "#D3D3D3",
-                opacity: 0.1
-            }
-        })
-        
-        // this will hold all world bodies for translation of ground and walls w.r.t ball movement
-        const world_bodies = Matter.Composite.create(); 
-        Matter.Composite.add(world_bodies, [ground, leftWall]);
+        const leftWall = Matter.Bodies.rectangle(-50, height / 2, 100, height * 2, { isStatic: true, render: { visible: false } })
 
-        Matter.Composite.add(engine.world, [ball, world_bodies])
+        Matter.Composite.add(engine.world, [ball, ground, leftWall])
 
         const runner = Matter.Runner.create()
-        runnerRef.current = runner 
 
         if (activeGame) {
             Matter.Render.run(render)
             Matter.Runner.run(runner, engine);
         }      
-        let cameraOffsetX: number
-        let cameraOffsetY: number
         
-        // continuous force while keys are held
+        // --- UPDATE LOOP ---
         const forceMagnitude = 0.002
+        
         const beforeUpdate = () => {
             const b = ballRef.current
             if (!b || !renderRef.current) return
+
+            // Controls
             if (keysRef.current.left) Matter.Body.applyForce(b, b.position, { x: -forceMagnitude, y: 0 })
             if (keysRef.current.right) Matter.Body.applyForce(b, b.position, { x: forceMagnitude, y: 0 })
-            if (keysRef.current.down) Matter.Body.applyForce(b, b.position, { x: 0, y: forceMagnitude })
-
-            // move the ground and walls in the opposite horizontal direction of the ball
-            // this creates an effect where the platform appears to slide opposite to ball movement
-            const platformMoveFactor = 3 // tweak for responsiveness
-            const dx = -b.velocity.x * platformMoveFactor
-            try {
-                 if (world_bodies && containerRef.current) { 
-                    Matter.Composite.translate(world_bodies, { x: dx, y: 0 });
-                    // also parallax background movement
-                    if (cutsceneDoneRef.current) {    
-                    const currentBGPos = containerRef.current.style.backgroundPositionX;
-                    const currentBGPosValue = currentBGPos ? parseFloat(currentBGPos) : 0;
-                    containerRef.current.style.backgroundPositionX = `${currentBGPosValue + dx * 0.5}px`;
-                    }
-                }
-            } catch {
-                // ignore translate errors
-            }
             
-            if (cutsceneDoneRef.current) {
-                    // After cutscene: lower-right offset
-                    cameraOffsetX = -width * 0.09
-                    cameraOffsetY = -height * 0.9
-            } else {
-                    // Before cutscene: cutscene hi hoga bhai
-                    cameraOffsetX = -width * 0.3
-                    cameraOffsetY = -height * 0.5
+            // Gyro
+            const tilt = tiltRef.current;
+            if (Math.abs(tilt) > 0.1) {
+                const sensorForce = tilt * 0.004; 
+                Matter.Body.applyForce(b, b.position, { x: sensorForce, y: 0 });
             }
 
-            Matter.Render.lookAt(renderRef.current,cutsceneDoneRef.current ? {
-                    min: { x: b.position.x + cameraOffsetX, y: b.position.y + cameraOffsetY },
-                    max: { x: b.position.x + cameraOffsetX + width, y: b.position.y + cameraOffsetY + height }
-                } : { 
-                    min: { x: -width/2, y: height/2 },
-                    max: { x: width/2, y: height }
-                }
-            )
-
+            // Camera Logic
+            const screenCenter = width / 2;
+            const ballX = b.position.x;
             
+            let targetMinX = ballX - screenCenter;
+            if (targetMinX < 0) targetMinX = 0; 
 
+            const currentMinX = render.bounds.min.x;
+            const lerp = 0.1; 
+            const newMinX = currentMinX + (targetMinX - currentMinX) * lerp;
+
+            Matter.Bounds.shift(render.bounds, { x: newMinX, y: 0 });
+
+            // Parallax
+            if (containerRef.current) {
+                containerRef.current.style.backgroundPositionX = `${-newMinX * 0.5}px`;
+            }
         }
+
         Matter.Events.on(engine, "beforeUpdate", beforeUpdate)
 
-        Matter.Events.on(engine, "collisionStart", event => {
-            event.pairs.forEach(pair => {
 
-                const bodies = [pair.bodyA.label, pair.bodyB.label];
-
-                if (
-                !cutsceneDone && containerRef.current &&
-                bodies.includes("ball") &&
-                bodies.includes("ground")
-                ) {
-                setCutsceneDone(true);
-                containerRef.current.classList.remove("bg-cover");
-                containerRef.current.style.backgroundImage = `url("/crowd.jpg")`;
-                }
-            });
-            });
-
-
-        // keyboard handlers
+        // Key Handlers
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") keysRef.current.left = true
             if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") keysRef.current.right = true
-            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") keysRef.current.up = true
-            if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") keysRef.current.down = true
+            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.code === "Space") handleJump();
         }
         const handleKeyUp = (e: KeyboardEvent) => {
             if (e.key === "ArrowLeft" || e.key === "a") keysRef.current.left = false
             if (e.key === "ArrowRight" || e.key === "d") keysRef.current.right = false
-            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") keysRef.current.up = false
-            if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") keysRef.current.down = false
         }
         window.addEventListener("keydown", handleKeyDown)
         window.addEventListener("keyup", handleKeyUp)
 
-        // resize handling
         const resize = () => {
             if (!containerRef.current || !renderRef.current) return
             const w = containerRef.current.clientWidth
-            Matter.Render.lookAt(renderRef.current, { min: { x: 0, y: 0 }, max: { x: w, y: height } })
-            renderRef.current.canvas.style.width = `${w}px`
             renderRef.current.canvas.width = w * (window.devicePixelRatio || 1)
         }
-        const ro = new ResizeObserver(resize)
-        ro.observe(containerRef.current)
+        window.addEventListener("resize", resize)
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown)
             window.removeEventListener("keyup", handleKeyUp)
-            window.removeEventListener("resize", checkOrientation)
-            window.removeEventListener("orientationchange", checkOrientation)
+            window.removeEventListener("resize", resize)
+            // Removed Orientation cleanup
             Matter.Events.off(engine, "beforeUpdate", beforeUpdate)
             Matter.Runner.stop(runner)
             Matter.Render.stop(render)
@@ -234,84 +209,48 @@ export default function Game({ onReady }: { onReady?: () => void }) {
             if (render.canvas && render.canvas.parentNode) render.canvas.parentNode.removeChild(render.canvas)
             Matter.Composite.clear(engine.world, false)
             Matter.Engine.clear(engine)
-            ro.disconnect()
         }
     }, [activeGame])
 
-    // mobile button handlers (touch + mouse)
     const startLeft = () => (keysRef.current.left = true)
     const stopLeft = () => (keysRef.current.left = false)
     const startRight = () => (keysRef.current.right = true)
     const stopRight = () => (keysRef.current.right = false)
+    const doJump = (e: any) => { e.preventDefault(); handleJump(); }
 
 
     return (
         <div id="game_container" className="overflow-hidden">
-            {/* Rotation Prompt Overlay for mobile devices */}
-            {showRotatePrompt && (
-                <div
-                    style={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        width: "100vw",
-                        height: "100vh",
-                        backgroundColor: "rgba(0, 0, 0, 0.95)",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        zIndex: 10,
-                        color: "white",
-                        textAlign: "center",
-                        padding: 16,
-                    }}
-                >
-                    <div style={{ fontSize: "clamp(36px, 6vw, 64px)", marginBottom: 16 }}>📱 ➜ 🔄</div>
-                    <h2 style={{ fontSize: "clamp(16px, 3.2vw, 24px)", marginBottom: 10, fontWeight: "bold" }}>
-                        Please Rotate Your Device
-                    </h2>
-                    <p style={{ fontSize: "clamp(12px, 2.5vw, 16px)", opacity: 0.9 }}>
-                        This Website is designed to be viewed in landscape mode (16:9)
-                    </p>
+            
+            {/* Permission Button */}
+            {activeGame && showMobileControls && !permissionGranted && tilt_available && (
+                <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 9999 }}>
+                    <button 
+                        onClick={requestMotionPermission}
+                        className="bg-cyan-600 text-white px-4 py-2 rounded shadow-lg border-2 border-white font-mono text-xs animate-pulse"
+                    >
+                        TAP TO START SENSORS
+                    </button>
                 </div>
             )}
 
-            <div ref={containerRef} className="bg-repeat-x bg-cover" style={{backgroundImage: `url("/Sky.png")`, width: "100%", height: "100%", position: "relative"}} />
+            {/* REMOVED: Rotation Prompt Overlay */}
+
+            <div ref={containerRef} className="bg-repeat-x bg-contain" style={{backgroundImage: `url("/crowd_edit.png")`, width: "100%", height: "100%", position: "relative"}} />
 
             {showMobileControls && activeGame && (
                 <>
-                    <button
-                        aria-label="Move left"
-                        className = "custom_button"
-                        style={{ left: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
-                        onMouseDown={startLeft}
-                        onMouseUp={stopLeft}
-                        onMouseLeave={stopLeft}
-                        onTouchStart={(e) => {
-                            e.stopPropagation()
-                            startLeft()
-                        }}
-                        onTouchEnd={stopLeft}
-                    >
-                        ◀
-                    </button>
+                    {/* Controls adjusted for Vertical Screen */}
+                    <button className = "custom_button" style={{ left: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
+                        onMouseDown={startLeft} onMouseUp={stopLeft} onMouseLeave={stopLeft}
+                        onTouchStart={(e) => { e.preventDefault(); startLeft() }} onTouchEnd={stopLeft}>◀</button>
 
-                    <button
-                        aria-label="Move right"
-                        className = "custom_button"
-                        style={{ right: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
-                        onMouseDown={startRight}
-                        onMouseUp={stopRight}
-                        onMouseLeave={stopRight}
-                        onTouchStart={(e) => {
-                            e.stopPropagation()
-                            startRight()
-                        }}
-                        onTouchEnd={stopRight}
-                    >
-                        ▶
-                    </button>
+                    <button className = "custom_button" style={{ left: 100, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
+                        onMouseDown={startRight} onMouseUp={stopRight} onMouseLeave={stopRight}
+                        onTouchStart={(e) => { e.preventDefault(); startRight() }} onTouchEnd={stopRight}>▶</button>
+                    
+                    <button className = "custom_button" style={{ right: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
+                        onMouseDown={doJump} onTouchStart={doJump}>▲</button>
                 </>
             )}
         </div>

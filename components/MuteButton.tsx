@@ -1,6 +1,6 @@
 
 import { useGlobalState } from "@/services/global_state";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MuteButton() {   
 

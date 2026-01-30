@@ -4,26 +4,24 @@ import { getBGTime } from "@/services/utils";
 interface GlobalState {
     startGame: boolean;
     setStartGame: (value: boolean) => void;
-    cutsceneDone: boolean;
-    setCutsceneDone: (value: boolean) => void;
     loopMusic: boolean;
     bgWallpaper: string;
     BGMusic: Howl;
     toggleMute: () => void;
+    MobileControls: boolean;
+    setShowMobileControls: (value: boolean) => void;
 
 }
 
 export const useGlobalState = create<GlobalState>((set)=>({
     startGame: false,
     setStartGame: (value: boolean) => set({startGame: value}),
-    cutsceneDone: false,
-    setCutsceneDone: (value: boolean) => set({cutsceneDone: value}),
     loopMusic: true,
     bgWallpaper: `/cloudscapes/${getBGTime()}/orig.png`,
     BGMusic: new Howl({
             src: ["/bgm.mp3"],
             loop: true,
-            volume: 0,
+            volume: 1,
             html5: true,
             preload: true,
         }),
@@ -39,6 +37,8 @@ export const useGlobalState = create<GlobalState>((set)=>({
         }
         return {};
     }),
+    MobileControls: false,
+    setShowMobileControls: (value: boolean) => set({MobileControls: value})
 
 
 }))
