@@ -332,7 +332,7 @@ export default function Game() {
                 {tiles.map((_, index) => (
                     <img 
                         key={`crowd-${index}`}
-                        src="/crowd.jpg" 
+                        src="/crowd.webp" 
                         alt="crowd"
                         className={`h-full w-auto object-cover ${index % 2 !== 0 ? 'scale-x-[-1]' : ''}`}
                         style={{ marginRight: '-1px' }}
