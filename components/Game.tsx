@@ -1,23 +1,34 @@
 "use client"
 
-import { useEffect, useRef, useState, useMemo, act } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
 import InfoBoards from "./InfoBoards"; 
 
-// --- FIXED STADIUM BANNER ---
+// --- FIXED STADIUM BANNER (SMART TEXT: SHORT ON MOBILE, FULL ON PC) ---
 const StadiumBanner = () => {
     return (
         <div 
             className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[60] 
-                       bg-gray-900/80 border-b-2 sm:border-b-4 border-blue-500 
-                       px-3 py-1.5 sm:px-6 sm:py-3 
-                       rounded-b-md sm:rounded-b-lg shadow-lg text-center backdrop-blur-sm pointer-events-none"
+                       bg-gray-900/95 
+                       border-b sm:border-b-4 border-blue-500 
+                       px-3 py-1 sm:px-6 sm:py-3 
+                       rounded-b-md sm:rounded-b-lg 
+                       shadow-lg text-center backdrop-blur-sm pointer-events-none
+                       w-auto max-w-[95vw]"
         >
-            <h1 className="text-white font-black text-xs sm:text-2xl uppercase tracking-wider drop-shadow-md whitespace-nowrap">
-                KREEDA MAHOTSAV STADIUM
+            <h1 className="text-white font-black 
+                           text-[10px] sm:text-2xl            /* Mobile: 10px (Readable now) */
+                           uppercase 
+                           tracking-normal sm:tracking-wider 
+                           drop-shadow-md whitespace-nowrap leading-none">
+                KREEDA MAHOTSAV
+                {/* 🔥 "2.0" HIDDEN ON MOBILE, VISIBLE ON PC 🔥 */}
+                <span className="hidden sm:inline"> 2.0</span>
             </h1>
-            <p className="text-cyan-300 font-mono text-[10px] sm:text-base font-bold">
+            <p className="text-cyan-300 font-mono 
+                          text-[6px] sm:text-base             /* Mobile: 6px */
+                          font-bold leading-none mt-[2px]">
                 - Team Parakram
             </p>
         </div>
@@ -52,17 +63,16 @@ export default function Game() {
     const globalMobileControls = useGlobalState((state) => state.MobileControls);
     const [isMobileScreen, setIsMobileScreen] = useState(false);
 
+    // GLOBAL GAME STATE
     const activeGame = useGlobalState((state) => state.startGame) ?? true;
     const setStartGame = useGlobalState((state) => state.setStartGame);
     const bgm_music = useGlobalState((state)=>state.BGMusic);
     const loop_music = useGlobalState((state)=>state.loopMusic);
 
     // --- MEMOIZED ASSETS ---
-    // 🔥 INCREASED TILE COUNT TO 150 (SAFE FOR SMALL IMAGES) 🔥
     const tileCount = 150; 
     const tiles = useMemo(() => [...Array(tileCount)], []);
 
-    // 🔥 MEMOIZED AD TEXT REPEATER 🔥
     const adText = useMemo(() => {
         const text = "  ★  NFSU DELHI  ★  KREEDA MAHOTSAV 2.0  ★  TEAM PARAKRAM  ★  ";
         return text.repeat(150); 
@@ -297,13 +307,12 @@ export default function Game() {
         // === MAIN CONTAINER ===
         <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
             
-            {/* FIXED STADIUM BANNER */}
-            { activeGame ? <StadiumBanner /> : null}
+            {/* 🔥 CONDITIONALLY RENDER BANNER: ONLY IF GAME IS ACTIVE 🔥 */}
+            { activeGame && <StadiumBanner /> }
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
             <div 
                 ref={structureRef}
-                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
                 className="absolute top-0 left-0 w-[150000px] h-full z-10 pointer-events-none"
                 style={{ willChange: 'transform' }}
             >
@@ -317,7 +326,6 @@ export default function Game() {
             <div 
                 ref={crowdRef} 
                 className="absolute top-[20%] left-0 h-[60%] z-20 flex pointer-events-none"
-                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
                 style={{ width: '150000px', willChange: 'transform' }} 
             >
                 <div className="absolute inset-0 z-30 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
@@ -335,7 +343,6 @@ export default function Game() {
             {/* === LAYER 2.5: ADVERTISEMENT HOARDING === */}
             <div 
                 ref={hoardingRef}
-                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
                 className="absolute bottom-[30%] left-0 w-[150000px] h-[6%] sm:h-[10%] z-25 flex items-center bg-gray-900 border-y-2 sm:border-y-4 border-blue-600 shadow-[0_0_20px_rgba(0,100,255,0.4)] pointer-events-none overflow-hidden"
                 style={{ willChange: 'transform' }}
             >
@@ -355,7 +362,6 @@ export default function Game() {
             <div 
                 ref={grassRef}
                 className="absolute bottom-0 left-0 h-[30%] z-40 flex pointer-events-none border-t-4 border-[#3a6b22]"
-                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
                 style={{ width: '150000px', willChange: 'transform' }}
             >
                 {tiles.map((_, index) => (
