@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useEffect, useRef, useState, useMemo, act } from "react"
 import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
 import InfoBoards from "./InfoBoards"; 
@@ -298,7 +298,7 @@ export default function Game() {
         <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
             
             {/* FIXED STADIUM BANNER */}
-            <StadiumBanner />
+            { activeGame ? <StadiumBanner /> : null}
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
             <div 

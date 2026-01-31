@@ -11,8 +11,8 @@ const pressStart2P = Press_Start_2P({
 
 
 export const metadata: Metadata = {
-  title:  "PARAKRAM",
-  description: "NFSU's Sport Club",
+  title:  "Kreeda Mohotsav 2.0",
+  description: "Event Present by Team Parakram",
 };
   
 export default function RootLayout({

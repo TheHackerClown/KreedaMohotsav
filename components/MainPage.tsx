@@ -25,8 +25,8 @@ export default function MainPage() {
 
     return (<div ref={mainPageRef} className="animate__animated text-white border-2 border-black flex flex-column items-center justify-around overflow-hidden z-3 w-full h-full bg-no-repeat bg-cover bg-center px-2 sm:px-4" style={{backgroundImage: `url("${bgWallpaper}")`}}>
         <div className="flex flex-col items-center justify-center gap-1 sm:gap-2">
-            <h1 className="text-[12px] sm:text-s md:text-2xl">Parakram Presents</h1>
-            <h2 className="text-[12px] sm:text-s md:text-2  xl">Kreeda Mohotsav 2.0</h2>
+            <h1 className="text-[12px] sm:text-s md:text-3xl">Parakram Presents</h1>
+            <h2 className="text-[12px] sm:text-s md:text-2xl">Kreeda Mohotsav 2.0</h2>
             <br />
             <Countdown targetUtc="2026-02-10T17:00:00Z" className="text-xs sm:text-s md:text-xl m-4 border-red-600 border p-4 bg-black" />
             <br />
