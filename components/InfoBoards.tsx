@@ -3,17 +3,17 @@
 import React, { useEffect, useState } from 'react';
 
 interface InfoBoardsProps {
-    containerRef: React.RefObject<HTMLDivElement> | null;
+    containerRef: React.RefObject<HTMLDivElement>;
     onExitGame: () => void;
 }
 
-// 📺 STADIUM JUMBOTRON SCREEN COMPONENT (Visuals Same as before)
-const StadiumScreen = ({ left, title, date, items, isEndScreen = false, onRegister }: any) => (
+// 📺 STADIUM JUMBOTRON SCREEN COMPONENT
+const StadiumScreen = ({ left, title, date, items, isEndScreen = false, onRegister, registerLink }: any) => (
     <div 
         className="absolute top-0 flex flex-col items-center z-30" 
         style={{ left: `${left}px` }}
     >
-        {/* Support Cables (Fading into the sky) */}
+        {/* Support Cables */}
         <div className="relative w-full flex justify-between px-4 sm:px-10 -mb-2">
             <div className="w-1 h-16 sm:h-32 bg-gradient-to-b from-transparent via-gray-700 to-gray-900 opacity-90"></div>
             <div className="w-1 h-16 sm:h-32 bg-gradient-to-b from-transparent via-gray-700 to-gray-900 opacity-90"></div>
@@ -27,6 +27,7 @@ const StadiumScreen = ({ left, title, date, items, isEndScreen = false, onRegist
                 ${isEndScreen ? 'w-[300px] sm:w-[550px]' : 'w-[280px] sm:w-[450px]'}
                 shadow-[inset_0px_0px_15px_rgba(0,0,0,0.8)]
                 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-900 to-black
+                relative overflow-hidden
             `}>
                 
                 <h1 className="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500 uppercase tracking-widest drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]">
@@ -40,17 +41,33 @@ const StadiumScreen = ({ left, title, date, items, isEndScreen = false, onRegist
                 )}
 
                 {!isEndScreen && (
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-3 text-left mt-2 relative">
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 pointer-events-none background-size-[100%_2px,3px_100%]"></div>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-3 text-left mt-2 relative z-30">
+                        {/* Background Scanlines */}
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[-1] pointer-events-none background-size-[100%_2px,3px_100%]"></div>
                         
                         {items.map((item: string, index: number) => (
-                            <div key={index} className="flex items-start gap-2 text-yellow-300 font-mono text-[10px] sm:text-xs font-bold leading-tight z-30">
+                            <div key={index} className="flex items-start gap-2 text-yellow-300 font-mono text-[10px] sm:text-xs font-bold leading-tight">
                                 <span className="text-yellow-500 mt-0.5">▶</span> {item}
                             </div>
                         ))}
                     </div>
                 )}
 
+                {/* 🔥 NEW: INDIVIDUAL REGISTER BUTTON FOR DAY 1 & DAY 2 🔥 */}
+                {!isEndScreen && registerLink && (
+                    <div className="mt-4 pt-3 border-t border-gray-800 flex justify-center w-full relative z-40">
+                        <a 
+                            href={registerLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="pointer-events-auto inline-block bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-[10px] sm:text-xs py-1.5 px-4 rounded border border-red-400 shadow-[0_0_10px_rgba(255,0,0,0.4)] transition-transform hover:scale-105 active:scale-95 uppercase tracking-wide"
+                        >
+                            REGISTER NOW!
+                        </a>
+                    </div>
+                )}
+
+                {/* END SCREEN BIG BUTTON */}
                 {isEndScreen && (
                     <div className="mt-4 sm:mt-6 flex flex-col items-center gap-3 relative z-30">
                         <p className="text-cyan-200 font-mono text-sm sm:text-lg animate-pulse font-bold">
@@ -60,7 +77,7 @@ const StadiumScreen = ({ left, title, date, items, isEndScreen = false, onRegist
                             onClick={onRegister}
                             className="pointer-events-auto bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-black py-2 px-6 sm:py-3 sm:px-8 rounded-lg text-lg sm:text-xl transition-all hover:scale-105 shadow-[0_0_25px_rgba(255,0,0,0.5)] border-2 border-red-500/50"
                         >
-                            REGISTER NOW
+                            RESTART EXPERIENCE
                         </button>
                     </div>
                 )}
@@ -83,26 +100,20 @@ export default function InfoBoards({ containerRef, onExitGame }: InfoBoardsProps
 
   useEffect(() => {
     const handleResize = () => {
-        // Agar width 768px se kam hai toh Mobile maano
         setIsMobile(window.innerWidth < 768);
     };
-
-    // Check on initial load
     handleResize();
-
-    // Listen for resize
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // --- POSITION CONFIGURATION ---
-  // PC: Wahi purane distances (No touch)
+  // PC: Old distances
   const pcPositions = [200, 1500, 3000, 4500, 6000];
 
-  // MOBILE: Closer distances (600-700px gap instead of 1500px)
+  // MOBILE: Closer distances (650px gap)
   const mobilePositions = [50, 650, 1250, 1850, 2450];
 
-  // Decide which array to use
   const pos = isMobile ? mobilePositions : pcPositions;
 
   return (
@@ -126,14 +137,16 @@ export default function InfoBoards({ containerRef, onExitGame }: InfoBoardsProps
         {/* SCREEN 2: DAY 1 */}
         <StadiumScreen 
             left={pos[1]}
-            title="DAY 1 ARENA"
+            title="DAY 1"
             date="Feb 18, 2026"
             items={[
-                "Athletics", "Shot Put",
+                "Athletics (Tracks)", "Shot Put & Discus",
                 "Javelin Throw", "Futsal (5v5)",
                 "Kho-Kho (Girls)", "Kabaddi (Boys)",
-                "Relay 4x200m", "Discus Throw"
+                "Relay 4x200m"
             ]}
+            // 🔥 Added Day 1 Link
+            registerLink="https://forms.gle/tJSbnLNzx8WVAA8e8"
         />
 
         {/* SCREEN 3: DAY 2 */}
@@ -142,13 +155,15 @@ export default function InfoBoards({ containerRef, onExitGame }: InfoBoardsProps
             title="DAY 2"
             date="Feb 19, 2026"
             items={[
-                "Badminton", "Chess",
+                "Badminton & TT", "Chess & Carrom",
                 "Volleyball", "Arm Wrestling",
-                "E-Sports", "Tug of War", "Table Tennis", "Carrom",
+                "E-Sports Gaming", "Tug of War"
             ]}
+            // 🔥 Added Day 2 Link
+            registerLink="https://forms.gle/SRHKWwusyipz1X5j6"
         />
 
-        {/* SCREEN 4: DAY 3 */}
+        {/* SCREEN 4: DAY 3 (No Register Link needed usually, just closing) */}
         <StadiumScreen 
             left={pos[3]}
             title="DAY 3"
