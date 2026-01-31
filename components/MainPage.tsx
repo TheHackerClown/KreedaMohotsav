@@ -3,15 +3,13 @@ import { useRef } from "react";
 import MuteButton from "@/components/MuteButton";
 import EnterButton from "@/components/EnterButton";
 import RuleBookButton from "@/components/RuleBook";
-import Day1Button from "./DAY1REG";
-import Day2Button from "./DAY2REG";
+import AboutUsButton from "@/components/AboutUs";
 
 export default function MainPage() {
     const mainPageRef = useRef<HTMLDivElement | null>(null);
     const changeToGame = useGlobalState((state)=>state.setStartGame);
     const bgWallpaper = useGlobalState((state)=>state.bgWallpaper);
-    const mobileDevice = useGlobalState((state)=>state.MobileControls);
-
+    
     const clickHandle = () => {
       //Tab Change
         changeToGame(true); 
@@ -23,8 +21,7 @@ export default function MainPage() {
         }, 800);
     }
 
-    if (!mobileDevice) {
-        return (<div ref={mainPageRef} className="animate__animated text-white border-2 border-black flex flex-column items-center justify-around overflow-hidden z-3 w-full h-full bg-no-repeat bg-cover bg-center px-2 sm:px-4" style={{backgroundImage: `url("${bgWallpaper}")`}}>
+    return (<div ref={mainPageRef} className="animate__animated text-white border-2 border-black flex flex-column items-center justify-around overflow-hidden z-3 w-full h-full bg-no-repeat bg-cover bg-center px-2 sm:px-4" style={{backgroundImage: `url("${bgWallpaper}")`}}>
         <div className="flex flex-col items-center justify-center gap-1 sm:gap-2">
             <h1 className="text-[10px] sm:text-sm md:text-lg">Parakram Presents</h1>
             <h2 className="text-[12px] sm:text-s md:text-2xl">Kreeda Mohotsav 2.0</h2>
@@ -35,30 +32,7 @@ export default function MainPage() {
             <br />
             <RuleBookButton />
             <br />
-            <Day1Button/>
-            <br />
-            <Day2Button/>
-        </div>
+            <AboutUsButton />
+            </div>
     </div>) 
-    } else {
-        return (<div ref={mainPageRef} className="animate__animated text-white border-2 border-black flex flex-column items-center justify-around overflow-hidden z-3 w-full h-full bg-no-repeat bg-cover bg-center px-2 sm:px-4" style={{backgroundImage: `url("${bgWallpaper}")`}}>
-        <div>
-            <Day1Button/>        
-        </div>
-        <div className="flex flex-col items-center justify-center gap-1 sm:gap-2">
-            <h1 className="text-[10px] sm:text-sm md:text-lg">Parakram Presents</h1>
-            <h2 className="text-[12px] sm:text-s md:text-2xl">Kreeda Mohotsav 2.0</h2>
-            <br />
-            <EnterButton onClick={clickHandle}/>
-            <br />
-            <MuteButton />
-            <br />
-            <RuleBookButton />
-        </div>
-        <div>
-            <Day2Button/>
-        </div>
-    </div>)
-    }
-
 }

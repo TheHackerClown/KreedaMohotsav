@@ -7,23 +7,21 @@ import InfoBoards from "./InfoBoards";
 
 // --- FIXED STADIUM BANNER (Mobile Optimized) ---
 const StadiumBanner = () => {
-    return (
-        <div 
-            className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[60] 
-                       bg-gray-900/80 border-b-2 sm:border-b-4 border-blue-500 
-                       px-3 py-1.5 sm:px-6 sm:py-3 
-                       rounded-b-md sm:rounded-b-lg shadow-lg text-center backdrop-blur-sm pointer-events-none"
-        >
-            {/* Mobile: text-xs (Extra Small) | PC: text-2xl (Big) */}
-            <h1 className="text-white font-black text-xs sm:text-2xl uppercase tracking-wider drop-shadow-md whitespace-nowrap">
-                KREEDA MAHOTSAV STADIUM
-            </h1>
-            {/* Mobile: text-[10px] (Tiny) | PC: text-base (Normal) */}
-            <p className="text-cyan-300 font-mono text-[10px] sm:text-base font-bold">
-                - Team Parakram
-            </p>
-        </div>
-    );
+        return (
+            <div 
+                className="fixed top-0 left-1/2 transform -translate-x-1/2 enforce_z
+                           bg-gray-900/80 border-b-2 sm:border-b-4 border-blue-500 
+                           px-3 py-1.5 sm:px-6 sm:py-3 
+                           rounded-b-md sm:rounded-b-lg shadow-lg text-center backdrop-blur-sm pointer-events-none"
+            >
+                <h1 className="text-white font-black text-xs sm:text-2xl uppercase tracking-wider drop-shadow-md whitespace-nowrap">
+                    KREEDA MAHOTSAV STADIUM
+                </h1>
+                <p className="text-cyan-300 font-mono text-[10px] sm:text-base font-bold">
+                    - Team Parakram
+                </p>
+            </div>
+        );
 };
 
 export default function Game() {
@@ -285,7 +283,7 @@ export default function Game() {
         <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
             
             {/* FIXED STADIUM BANNER (Small on Mobile, Big on PC) */}
-            <StadiumBanner />
+            {activeGame ? <StadiumBanner /> : null}
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
             <div 

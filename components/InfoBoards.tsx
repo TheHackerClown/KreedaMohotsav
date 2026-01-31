@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 interface InfoBoardsProps {
-    containerRef: React.RefObject<HTMLDivElement>;
+    containerRef: React.RefObject<HTMLDivElement> | null;
     onExitGame: () => void;
 }
 
