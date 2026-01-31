@@ -5,8 +5,7 @@ import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
 import InfoBoards from "./InfoBoards"; 
 
-// --- FIXED STADIUM BANNER (JS CONTROLLED TEXT) ---
-// 🔥 Now accepts 'isMobile' prop to guarantee correct text 🔥
+// --- FIXED STADIUM BANNER ---
 const StadiumBanner = ({ isMobile }: { isMobile: boolean }) => {
     return (
         <div 
@@ -19,15 +18,14 @@ const StadiumBanner = ({ isMobile }: { isMobile: boolean }) => {
                        w-auto max-w-[95vw]"
         >
             <h1 className="text-white font-black 
-                           text-[10px] sm:text-2xl            /* Mobile: 10px, PC: 2xl */
+                           text-[10px] sm:text-2xl 
                            uppercase 
                            tracking-normal sm:tracking-wider 
                            drop-shadow-md whitespace-nowrap leading-none">
-                {/* 🔥 LOGIC: Mobile h toh '2.0' hata do, PC h toh dikhao 🔥 */}
                 {isMobile ? "KREEDA MAHOTSAV" : "KREEDA MAHOTSAV 2.0"}
             </h1>
             <p className="text-cyan-300 font-mono 
-                          text-[6px] sm:text-base             /* Mobile: 6px */
+                          text-[6px] sm:text-base 
                           font-bold leading-none mt-[2px]">
                 - Team Parakram
             </p>
@@ -65,7 +63,6 @@ export default function Game() {
 
     // GLOBAL GAME STATE
     const activeGame = useGlobalState((state) => state.startGame) ?? true;
-    const setStartGame = useGlobalState((state) => state.setStartGame);
     const bgm_music = useGlobalState((state)=>state.BGMusic);
     const loop_music = useGlobalState((state)=>state.loopMusic);
 
@@ -183,7 +180,7 @@ export default function Game() {
         })
         ballRef.current = ball
 
-        // --- INVISIBLE PHYSICS GROUND ---
+        // 1. GROUND
         const ground = Matter.Bodies.rectangle(0, groundLevel + 50, 100000, 100, {
             label: "ground",
             isStatic: true,
@@ -192,18 +189,26 @@ export default function Game() {
         })
         Matter.Body.setPosition(ground, { x: 40000, y: groundLevel + 50 })
 
+        // 2. CEILING (INVISIBLE WALL TOP)
+        // Ball screen se bahar na ude iske liye
+        const ceiling = Matter.Bodies.rectangle(40000, -100, 100000, 200, {
+            label: "ceiling",
+            isStatic: true,
+            render: { visible: false }
+        })
+
+        // 3. LEFT WALL
         const leftWall = Matter.Bodies.rectangle(-50, height / 2, 100, height * 2, { isStatic: true, render: { visible: false } })
 
-        // RIGHT WALL
+        // 4. RIGHT WALL
         const endPosition = isMobile ? 15000 : 32500;
-        
         const rightWall = Matter.Bodies.rectangle(endPosition, height / 2, 100, height * 2, { 
             isStatic: true, 
             label: "end_wall",
             render: { visible: false } 
         });
 
-        Matter.Composite.add(engine.world, [ball, ground, leftWall, rightWall])
+        Matter.Composite.add(engine.world, [ball, ground, ceiling, leftWall, rightWall])
 
         const runner = Matter.Runner.create()
 
@@ -307,7 +312,6 @@ export default function Game() {
         // === MAIN CONTAINER ===
         <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
             
-            {/* 🔥 CONDITIONALLY RENDER BANNER WITH PROPS 🔥 */}
             { activeGame && <StadiumBanner isMobile={isMobileScreen} /> }
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
