@@ -17,7 +17,7 @@ export const useGlobalState = create<GlobalState>((set)=>({
     startGame: false,
     setStartGame: (value: boolean) => set({startGame: value}),
     loopMusic: true,
-    bgWallpaper: `/cloudscapes/${getBGTime()}/orig.png`,
+    bgWallpaper: `/cloudscapes/${getBGTime()}/orig.webp`,
     BGMusic: new Howl({
             src: ["/bgm.mp3"],
             loop: true,

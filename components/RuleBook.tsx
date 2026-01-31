@@ -1,8 +1,8 @@
 
-export default function RuleBookButton() {
+export default function RuleBookButton({ className }: { className?: string }) {
   return (<button
-          className="
-            relative px-3 sm:px-6 py-1.5 sm:py-3 font-mono text-xs sm:text-base font-bold
+          className={` ${className}
+            px-3 sm:px-6 py-1.5 sm:py-3 font-mono text-xs sm:text-base font-bold
             transition-all duration-150 ease-in-out
             bg-white text-black border-black
             border-2 sm:border-4
@@ -13,7 +13,7 @@ export default function RuleBookButton() {
             active:shadow-none
             active:translate-x-1
             active:translate-y-1
-          "
+          `}
         >
           <div className="flex items-center gap-1.5 sm:gap-3">
             <img src="/book-half.svg" alt="Rulebook Icon" className="w-6 h-6" />

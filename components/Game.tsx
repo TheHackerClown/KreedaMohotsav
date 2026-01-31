@@ -9,7 +9,7 @@ import InfoBoards from "./InfoBoards";
 const StadiumBanner = () => {
         return (
             <div 
-                className="fixed top-0 left-1/2 transform -translate-x-1/2 enforce_z
+                className="fixed top-0 left-1/2 transform -translate-x-1/2 z-60
                            bg-gray-900/80 border-b-2 sm:border-b-4 border-blue-500 
                            px-3 py-1.5 sm:px-6 sm:py-3 
                            rounded-b-md sm:rounded-b-lg shadow-lg text-center backdrop-blur-sm pointer-events-none"
@@ -302,7 +302,7 @@ export default function Game() {
                 ref={crowdRef} 
                 className="absolute top-[20%] left-0 w-full h-[60%] bg-repeat-x z-20"
                 style={{
-                    backgroundImage: `url("/crowd.jpg")`, 
+                    backgroundImage: `url("/crowd.webp")`, 
                     backgroundPosition: "bottom left",
                     backgroundSize: "auto 90%", 
                     willChange: "background-position",
@@ -361,6 +361,10 @@ export default function Game() {
                         onMouseDown={doJump} onTouchStart={doJump}>▲</button>
                 </div>
             )}
+            {/* Developer credits */}
+      <div className="fixed bottom-2 right-2 text-right text-xs sm:text-sm text-gray-500 z-10">
+        <p>Developed by <a href="https://github.com/TheHackerClown" className="text-red-600">TheHackerClown</a> & <a href="https://github.com/Aditya-Dahiya-007" className="text-red-600">Aditya-Dahiya-007</a></p>
+      </div>
         </div>
     )
 }

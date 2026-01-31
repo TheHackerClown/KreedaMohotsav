@@ -1,9 +1,9 @@
 
-export default function AboutUsButton() {
+export default function AboutUsButton({ className }: { className?: string }) {
   return (<a
           href="/about_us"
-          className="
-            relative px-3 sm:px-6 py-1.5 sm:py-3 font-mono text-xs sm:text-base font-bold
+          className={`${className}
+            px-3 sm:px-6 py-1.5 sm:py-3 font-mono text-xs sm:text-base font-bold
             transition-all duration-150 ease-in-out
             bg-red-500 text-white border-red-950
             border-2 sm:border-4
@@ -14,7 +14,7 @@ export default function AboutUsButton() {
             active:shadow-none
             active:translate-x-1
             active:translate-y-1
-          "
+          `}
         >
           <div className="flex items-center gap-1.5 sm:gap-3">
             <img src="/about.svg" alt="About Us Icon" className="w-6 h-6" />

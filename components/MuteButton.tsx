@@ -2,7 +2,7 @@
 import { useGlobalState } from "@/services/global_state";
 import { useEffect, useState } from "react";
 
-export default function MuteButton() {   
+export default function MuteButton({ className }: { className?: string }) {   
 
     const toggleMute = useGlobalState((state)=>state.toggleMute);
     const [isMuted, setIsMuted] = useState<boolean>(useGlobalState((state)=>!state.loopMusic));
@@ -14,8 +14,8 @@ export default function MuteButton() {
     return (
         <button
           onClick={onclickhandle}
-          className={`
-            relative px-3 sm:px-6 py-1.5 sm:py-3 font-mono text-xs sm:text-base font-bold
+          className={` ${className}
+            px-3 sm:px-6 py-1.5 sm:py-3 font-mono text-xs sm:text-base font-bold
             transition-all duration-150 ease-in-out
             ${isMuted 
               ? 'bg-red-600 text-white border-red-800' 

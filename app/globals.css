@@ -56,7 +56,118 @@ body {
   -webkit-user-select: none;
   border: none;
   }
+/* Masonry Grid Layout */
+.masonry-grid {
+          display: grid;
+          grid-template-columns: repeat(1, 1fr);
+          gap: 1rem;
+          padding: 0 1rem;
+        }
 
-  .enforce_z {
-    z-index: 11 !important;
-  }
+@media (min-width: 640px) {
+          .masonry-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+@media (min-width: 1024px) {
+          .masonry-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+@media (min-width: 1280px) {
+          .masonry-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+.masonry-item {
+          break-inside: avoid;
+          page-break-inside: avoid;
+          margin-bottom: 0;
+        }
+
+        /* Staggered heights for masonry effect */
+        .masonry-item:nth-child(6n+1) .member-card-inner {
+          min-height: 420px;
+        }
+
+        .masonry-item:nth-child(6n+2) .member-card-inner {
+          min-height: 380px;
+        }
+
+        .masonry-item:nth-child(6n+3) .member-card-inner {
+          min-height: 440px;
+        }
+
+        .masonry-item:nth-child(6n+4) .member-card-inner {
+          min-height: 400px;
+        }
+
+        .masonry-item:nth-child(6n+5) .member-card-inner {
+          min-height: 460px;
+        }
+
+        .masonry-item:nth-child(6n+6) .member-card-inner {
+          min-height: 390px;
+        }
+
+        @media (max-width: 640px) {
+          .masonry-item .member-card-inner {
+            min-height: auto !important;
+          }
+        }
+        
+        @keyframes gridScroll {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(40px); }
+        }
+
+        @keyframes fadeInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(30px);
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+
+        /* Responsive text scaling */
+        @media (max-width: 640px) {
+          h1 {
+            font-size: 1.5rem !important;
+          }
+          h3 {
+            font-size: 0.75rem !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          h1 {
+            font-size: 1.25rem !important;
+          }
+        }
+
+.image_render {
+  image-rendering: crisp-edges;
+}
