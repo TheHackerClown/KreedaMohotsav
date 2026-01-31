@@ -5,8 +5,9 @@ import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
 import InfoBoards from "./InfoBoards"; 
 
-// --- FIXED STADIUM BANNER (SMART TEXT: SHORT ON MOBILE, FULL ON PC) ---
-const StadiumBanner = () => {
+// --- FIXED STADIUM BANNER (JS CONTROLLED TEXT) ---
+// 🔥 Now accepts 'isMobile' prop to guarantee correct text 🔥
+const StadiumBanner = ({ isMobile }: { isMobile: boolean }) => {
     return (
         <div 
             className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[60] 
@@ -18,13 +19,12 @@ const StadiumBanner = () => {
                        w-auto max-w-[95vw]"
         >
             <h1 className="text-white font-black 
-                           text-[10px] sm:text-2xl            /* Mobile: 10px (Readable now) */
+                           text-[10px] sm:text-2xl            /* Mobile: 10px, PC: 2xl */
                            uppercase 
                            tracking-normal sm:tracking-wider 
                            drop-shadow-md whitespace-nowrap leading-none">
-                KREEDA MAHOTSAV
-                {/* 🔥 "2.0" HIDDEN ON MOBILE, VISIBLE ON PC 🔥 */}
-                <span className="hidden sm:inline"> 2.0</span>
+                {/* 🔥 LOGIC: Mobile h toh '2.0' hata do, PC h toh dikhao 🔥 */}
+                {isMobile ? "KREEDA MAHOTSAV" : "KREEDA MAHOTSAV 2.0"}
             </h1>
             <p className="text-cyan-300 font-mono 
                           text-[6px] sm:text-base             /* Mobile: 6px */
@@ -307,8 +307,8 @@ export default function Game() {
         // === MAIN CONTAINER ===
         <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
             
-            {/* 🔥 CONDITIONALLY RENDER BANNER: ONLY IF GAME IS ACTIVE 🔥 */}
-            { activeGame && <StadiumBanner /> }
+            {/* 🔥 CONDITIONALLY RENDER BANNER WITH PROPS 🔥 */}
+            { activeGame && <StadiumBanner isMobile={isMobileScreen} /> }
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
             <div 
@@ -332,7 +332,7 @@ export default function Game() {
                 {tiles.map((_, index) => (
                     <img 
                         key={`crowd-${index}`}
-                        src="/crowd.webp" 
+                        src="/crowd.jpg" 
                         alt="crowd"
                         className={`h-full w-auto object-cover ${index % 2 !== 0 ? 'scale-x-[-1]' : ''}`}
                         style={{ marginRight: '-1px' }}
