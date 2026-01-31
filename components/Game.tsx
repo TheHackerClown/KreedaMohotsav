@@ -1,27 +1,27 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import Matter from "matter-js";
 import { useGlobalState } from "@/services/global_state";
 import InfoBoards from "./InfoBoards"; 
 
-// --- FIXED STADIUM BANNER (Mobile Optimized) ---
+// --- FIXED STADIUM BANNER ---
 const StadiumBanner = () => {
-        return (
-            <div 
-                className="fixed top-0 left-1/2 transform -translate-x-1/2 z-60
-                           bg-gray-900/80 border-b-2 sm:border-b-4 border-blue-500 
-                           px-3 py-1.5 sm:px-6 sm:py-3 
-                           rounded-b-md sm:rounded-b-lg shadow-lg text-center backdrop-blur-sm pointer-events-none"
-            >
-                <h1 className="text-white font-black text-xs sm:text-2xl uppercase tracking-wider drop-shadow-md whitespace-nowrap">
-                    KREEDA MAHOTSAV STADIUM
-                </h1>
-                <p className="text-cyan-300 font-mono text-[10px] sm:text-base font-bold">
-                    - Team Parakram
-                </p>
-            </div>
-        );
+    return (
+        <div 
+            className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[60] 
+                       bg-gray-900/80 border-b-2 sm:border-b-4 border-blue-500 
+                       px-3 py-1.5 sm:px-6 sm:py-3 
+                       rounded-b-md sm:rounded-b-lg shadow-lg text-center backdrop-blur-sm pointer-events-none"
+        >
+            <h1 className="text-white font-black text-xs sm:text-2xl uppercase tracking-wider drop-shadow-md whitespace-nowrap">
+                KREEDA MAHOTSAV STADIUM
+            </h1>
+            <p className="text-cyan-300 font-mono text-[10px] sm:text-base font-bold">
+                - Team Parakram
+            </p>
+        </div>
+    );
 };
 
 export default function Game() {
@@ -33,6 +33,7 @@ export default function Game() {
     // Parallax Layer Refs
     const structureRef = useRef<HTMLDivElement | null>(null)
     const crowdRef = useRef<HTMLDivElement | null>(null)
+    const hoardingRef = useRef<HTMLDivElement | null>(null)
     const grassRef = useRef<HTMLDivElement | null>(null)
     const boardsRef = useRef<HTMLDivElement | null>(null)
     
@@ -55,6 +56,17 @@ export default function Game() {
     const setStartGame = useGlobalState((state) => state.setStartGame);
     const bgm_music = useGlobalState((state)=>state.BGMusic);
     const loop_music = useGlobalState((state)=>state.loopMusic);
+
+    // --- MEMOIZED ASSETS ---
+    // 🔥 INCREASED TILE COUNT TO 150 (SAFE FOR SMALL IMAGES) 🔥
+    const tileCount = 150; 
+    const tiles = useMemo(() => [...Array(tileCount)], []);
+
+    // 🔥 MEMOIZED AD TEXT REPEATER 🔥
+    const adText = useMemo(() => {
+        const text = "  ★  NFSU DELHI  ★  KREEDA MAHOTSAV 2.0  ★  TEAM PARAKRAM  ★  ";
+        return text.repeat(150); 
+    }, []);
 
     // --- SETUP LISTENERS ---
     useEffect(() => {
@@ -161,6 +173,7 @@ export default function Game() {
         })
         ballRef.current = ball
 
+        // --- INVISIBLE PHYSICS GROUND ---
         const ground = Matter.Bodies.rectangle(0, groundLevel + 50, 100000, 100, {
             label: "ground",
             isStatic: true,
@@ -225,14 +238,16 @@ export default function Game() {
             // --- PARALLAX SYNC ---
             const SPEED_STRUCTURE = 0.2; 
             const SPEED_BOARDS = 0.2;    
-            const SPEED_CROWD = 0.5;    
+            const SPEED_CROWD = 0.5;
+            const SPEED_HOARDING = 0.5;
             const SPEED_GRASS = 1.0;  
 
             if (structureRef.current) structureRef.current.style.transform = `translateX(${-newMinX * SPEED_STRUCTURE}px)`;
             if (boardsRef.current) boardsRef.current.style.transform = `translateX(${-newMinX * SPEED_BOARDS}px)`;
             
-            if (crowdRef.current) crowdRef.current.style.backgroundPositionX = `${-newMinX * SPEED_CROWD}px`;
-            if (grassRef.current) grassRef.current.style.backgroundPositionX = `${-newMinX * SPEED_GRASS}px`;
+            if (crowdRef.current) crowdRef.current.style.transform = `translateX(${-newMinX * SPEED_CROWD}px)`;
+            if (hoardingRef.current) hoardingRef.current.style.transform = `translateX(${-newMinX * SPEED_HOARDING}px)`;
+            if (grassRef.current) grassRef.current.style.transform = `translateX(${-newMinX * SPEED_GRASS}px)`;
         }
 
         Matter.Events.on(engine, "beforeUpdate", beforeUpdate)
@@ -282,13 +297,14 @@ export default function Game() {
         // === MAIN CONTAINER ===
         <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
             
-            {/* FIXED STADIUM BANNER (Small on Mobile, Big on PC) */}
-            {activeGame ? <StadiumBanner /> : null}
+            {/* FIXED STADIUM BANNER */}
+            <StadiumBanner />
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
             <div 
                 ref={structureRef}
-                className="absolute top-0 left-0 w-[15000px] h-full z-10 pointer-events-none"
+                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
+                className="absolute top-0 left-0 w-[150000px] h-full z-10 pointer-events-none"
                 style={{ willChange: 'transform' }}
             >
                 {/* ROOF */}
@@ -297,19 +313,37 @@ export default function Game() {
                 <div className="absolute top-[12%] left-0 w-full h-[60%] bg-gray-800 z-10"></div>
             </div>
 
-            {/* === LAYER 2: CROWD (Middle) === */}
+            {/* === LAYER 2: CROWD === */}
             <div 
                 ref={crowdRef} 
-                className="absolute top-[20%] left-0 w-full h-[60%] bg-repeat-x z-20"
-                style={{
-                    backgroundImage: `url("/crowd.webp")`, 
-                    backgroundPosition: "bottom left",
-                    backgroundSize: "auto 90%", 
-                    willChange: "background-position",
-                    maskImage: "linear-gradient(to bottom, transparent 0%, black 20%)",
-                    WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 20%)"
-                }}
-            />
+                className="absolute top-[20%] left-0 h-[60%] z-20 flex pointer-events-none"
+                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
+                style={{ width: '150000px', willChange: 'transform' }} 
+            >
+                <div className="absolute inset-0 z-30 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+                {tiles.map((_, index) => (
+                    <img 
+                        key={`crowd-${index}`}
+                        src="/crowd.jpg" 
+                        alt="crowd"
+                        className={`h-full w-auto object-cover ${index % 2 !== 0 ? 'scale-x-[-1]' : ''}`}
+                        style={{ marginRight: '-1px' }}
+                    />
+                ))}
+            </div>
+
+            {/* === LAYER 2.5: ADVERTISEMENT HOARDING === */}
+            <div 
+                ref={hoardingRef}
+                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
+                className="absolute bottom-[30%] left-0 w-[150000px] h-[6%] sm:h-[10%] z-25 flex items-center bg-gray-900 border-y-2 sm:border-y-4 border-blue-600 shadow-[0_0_20px_rgba(0,100,255,0.4)] pointer-events-none overflow-hidden"
+                style={{ willChange: 'transform' }}
+            >
+                 <div className="whitespace-nowrap text-yellow-300 font-black text-sm sm:text-2xl font-mono tracking-widest drop-shadow-[0_0_5px_rgba(255,255,0,0.8)]">
+                    {adText}
+                 </div>
+                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_50%,transparent_50%),linear-gradient(90deg,rgba(0,0,0,0.1)_50%,transparent_50%)] bg-[length:4px_4px] pointer-events-none"></div>
+            </div>
 
             {/* === LAYER 3: JUMBOTRONS === */}
              <InfoBoards 
@@ -317,24 +351,28 @@ export default function Game() {
                 onExitGame={() => window.location.reload()} 
             />
 
-            {/* === LAYER 4: GRASS (Foreground) === */}
+            {/* === LAYER 4: GRASS === */}
             <div 
                 ref={grassRef}
-                className="absolute bottom-0 left-0 w-full h-[30%] bg-repeat-x z-40"
-                style={{
-                    backgroundImage: "linear-gradient(to bottom, #4d8c2d 0%, #2d6a18 100%)",
-                    backgroundSize: "auto 100%", 
-                    borderTop: "4px solid #3a6b22", 
-                    willChange: "background-position",
-                }}
-            />
+                className="absolute bottom-0 left-0 h-[30%] z-40 flex pointer-events-none border-t-4 border-[#3a6b22]"
+                // 🔥 INCREASED WIDTH FOR PC COVERAGE 🔥
+                style={{ width: '150000px', willChange: 'transform' }}
+            >
+                {tiles.map((_, index) => (
+                    <img 
+                        key={`grass-${index}`}
+                        src="/grass.jpg" 
+                        alt="grass"
+                        className={`h-full w-auto object-cover ${index % 2 !== 0 ? 'scale-x-[-1]' : ''}`}
+                         style={{ marginRight: '-1px' }}
+                    />
+                ))}
+            </div>
 
             {/* === LAYER 5: PHYSICS CANVAS === */}
             <div ref={containerRef} className="absolute top-0 left-0 w-full h-full z-50 pointer-events-none" />
             
             {/* === UI OVERLAYS === */}
-            
-            {/* SENSOR BUTTON (Only if needed) */}
             {showMobileUI && requiresButton && !permissionGranted && (
                 <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 9999 }}>
                     <button 
@@ -346,7 +384,6 @@ export default function Game() {
                 </div>
             )}
 
-            {/* MOBILE CONTROLS */}
             {showMobileUI && (
                 <div className="z-[100] relative pointer-events-auto">
                     <button className = "custom_button bg-green-900/80 border-green-400 text-green-100" style={{ left: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
@@ -361,10 +398,6 @@ export default function Game() {
                         onMouseDown={doJump} onTouchStart={doJump}>▲</button>
                 </div>
             )}
-            {/* Developer credits */}
-      <div className="fixed bottom-2 right-2 text-right text-xs sm:text-sm text-gray-500 z-10">
-        <p>Developed by <a href="https://github.com/TheHackerClown" className="text-red-600">TheHackerClown</a> & <a href="https://github.com/Aditya-Dahiya-007" className="text-red-600">Aditya-Dahiya-007</a></p>
-      </div>
         </div>
     )
 }
