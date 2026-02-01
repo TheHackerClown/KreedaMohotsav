@@ -71,7 +71,7 @@ export default function Game() {
     const tiles = useMemo(() => [...Array(tileCount)], []);
 
     const adText = useMemo(() => {
-        const text = "  NFSU DELHI  ★  KREEDA MAHOTSAV 2.0  ★  TEAM PARAKRAM  ★  THIS WAY ---→  ★";
+        const text = "  THIS WAY -->  ★  NFSU DELHI  ★  KREEDA MAHOTSAV 2.0  ★  TEAM PARAKRAM  ★";
         return text.repeat(150); 
     }, []);
 

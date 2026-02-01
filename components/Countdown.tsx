@@ -38,14 +38,21 @@ const formatTimeParts = (ms: number) => {
 };
 
 export default function Countdown({ targetUtc, className }: CountdownProps) {
-	const targetDate = new Date(targetUtc);
-	const isValidTarget = !Number.isNaN(targetDate.getTime());
+	const [targetDate, setTargetDate] = useState<Date>(new Date(targetUtc));
+
+	useEffect(() => {
+		const date = new Date(targetUtc);
+		if (!Number.isNaN(date.getTime())) {
+			setTargetDate(date);
+		}
+	}, [targetUtc]);
+	
 	const [remainingMs, setRemainingMs] = useState(() =>
-		isValidTarget ? targetDate.getTime() - Date.now() : 0
+		targetDate ? targetDate.getTime() - Date.now() : 0
 	);
 
 	useEffect(() => {
-		if (!isValidTarget) {
+		if (!targetDate) {
 			setRemainingMs(0);
 			return undefined;
 		}
@@ -58,15 +65,11 @@ export default function Countdown({ targetUtc, className }: CountdownProps) {
 		const intervalId = window.setInterval(updateRemaining, 1000);
 
 		return () => window.clearInterval(intervalId);
-	}, [isValidTarget, targetUtc]);
-
-	if (!isValidTarget || remainingMs <= 0) {
-		return <span className={`${className} text-red-700`}>Registration Closed</span>;
-	}
+	}, [targetUtc]);
 
 	return (
-		<span className={`${className}`}>
-			Registration closes in {formatTimeParts(remainingMs)}
+		<span className={`${className} ${!targetDate || remainingMs <= 0 ? 'text-red-700' : ''}`}>
+		{!targetDate || remainingMs <= 0 ? 'Registration Closed' : `Registration closes in ${formatTimeParts(remainingMs)}`}
 		</span>
 	);
 }
