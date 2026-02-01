@@ -9,7 +9,7 @@ import InfoBoards from "./InfoBoards";
 const StadiumBanner = ({ isMobile }: { isMobile: boolean }) => {
     return (
         <div 
-            className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[60] 
+            className="fixed top-0 left-1/2 transform -translate-x-1/2 z-60 
                        bg-gray-900/95 
                        border-b sm:border-b-4 border-blue-500 
                        px-3 py-1 sm:px-6 sm:py-3 
@@ -26,7 +26,7 @@ const StadiumBanner = ({ isMobile }: { isMobile: boolean }) => {
             </h1>
             <p className="text-cyan-300 font-mono 
                           text-[6px] sm:text-base 
-                          font-bold leading-none mt-[2px]">
+                          font-bold leading-none mt-0.5">
                 - Team Parakram
             </p>
         </div>
@@ -310,14 +310,14 @@ export default function Game() {
 
     return (
         // === MAIN CONTAINER ===
-        <div id="game_container" className="overflow-hidden relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-200 to-white">
+        <div id="game_container" className="overflow-hidden relative w-full h-full bg-linear-to-b from-sky-400 via-sky-200 to-white">
             
             { activeGame && <StadiumBanner isMobile={isMobileScreen} /> }
 
             {/* === LAYER 1: STADIUM STRUCTURE === */}
             <div 
                 ref={structureRef}
-                className="absolute top-0 left-0 w-[150000px] h-full z-10 pointer-events-none"
+                className="absolute top-0 left-0 w-37500 h-full z-10 pointer-events-none"
                 style={{ willChange: 'transform' }}
             >
                 {/* ROOF */}
@@ -332,7 +332,7 @@ export default function Game() {
                 className="absolute top-[20%] left-0 h-[60%] z-20 flex pointer-events-none"
                 style={{ width: '150000px', willChange: 'transform' }} 
             >
-                <div className="absolute inset-0 z-30 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+                <div className="absolute inset-0 z-30 bg-linear-to-b from-transparent via-transparent to-black/30"></div>
                 {tiles.map((_, index) => (
                     <img 
                         key={`crowd-${index}`}
@@ -347,13 +347,13 @@ export default function Game() {
             {/* === LAYER 2.5: ADVERTISEMENT HOARDING === */}
             <div 
                 ref={hoardingRef}
-                className="absolute bottom-[30%] left-0 w-[150000px] h-[6%] sm:h-[10%] z-25 flex items-center bg-gray-900 border-y-2 sm:border-y-4 border-blue-600 shadow-[0_0_20px_rgba(0,100,255,0.4)] pointer-events-none overflow-hidden"
+                className="absolute bottom-[30%] left-0 w-37500 h-[6%] sm:h-[10%] z-25 flex items-center bg-gray-900 border-y-2 sm:border-y-4 border-blue-600 shadow-[0_0_20px_rgba(0,100,255,0.4)] pointer-events-none overflow-hidden"
                 style={{ willChange: 'transform' }}
             >
                  <div className="whitespace-nowrap text-yellow-300 font-black text-sm sm:text-2xl font-mono tracking-widest drop-shadow-[0_0_5px_rgba(255,255,0,0.8)]">
                     {adText}
                  </div>
-                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_50%,transparent_50%),linear-gradient(90deg,rgba(0,0,0,0.1)_50%,transparent_50%)] bg-[length:4px_4px] pointer-events-none"></div>
+                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_50%,transparent_50%),linear-gradient(90deg,rgba(0,0,0,0.1)_50%,transparent_50%)] bg-size-[4px_4px] pointer-events-none"></div>
             </div>
 
             {/* === LAYER 3: JUMBOTRONS === */}
@@ -371,7 +371,7 @@ export default function Game() {
                 {tiles.map((_, index) => (
                     <img 
                         key={`grass-${index}`}
-                        src="/grass.jpg" 
+                        src="/ground.webp" 
                         alt="grass"
                         className={`h-full w-auto object-cover ${index % 2 !== 0 ? 'scale-x-[-1]' : ''}`}
                          style={{ marginRight: '-1px' }}
@@ -395,7 +395,7 @@ export default function Game() {
             )}
 
             {showMobileUI && (
-                <div className="z-[100] relative pointer-events-auto">
+                <div className="z-100 relative pointer-events-auto">
                     <button className = "custom_button bg-green-900/80 border-green-400 text-green-100" style={{ left: 16, bottom: 16, fontSize: "clamp(16px, 3vw, 24px)", padding: "8px 12px", touchAction: "none" }}
                         onMouseDown={startLeft} onMouseUp={stopLeft} onMouseLeave={stopLeft}
                         onTouchStart={(e) => { e.preventDefault(); startLeft() }} onTouchEnd={stopLeft}>◀</button>
