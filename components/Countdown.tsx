@@ -38,7 +38,7 @@ const formatTimeParts = (ms: number) => {
 };
 
 export default function Countdown({ targetUtc, className }: CountdownProps) {
-	const targetDate = useMemo(() => new Date(targetUtc), [targetUtc]);
+	const targetDate = new Date(targetUtc);
 	const isValidTarget = !Number.isNaN(targetDate.getTime());
 	const [remainingMs, setRemainingMs] = useState(() =>
 		isValidTarget ? targetDate.getTime() - Date.now() : 0
@@ -58,7 +58,7 @@ export default function Countdown({ targetUtc, className }: CountdownProps) {
 		const intervalId = window.setInterval(updateRemaining, 1000);
 
 		return () => window.clearInterval(intervalId);
-	}, [isValidTarget, targetDate]);
+	}, [isValidTarget, targetUtc]);
 
 	if (!isValidTarget || remainingMs <= 0) {
 		return <span className={`${className} text-red-700`}>Registration Closed</span>;

@@ -71,7 +71,7 @@ export default function Game() {
     const tiles = useMemo(() => [...Array(tileCount)], []);
 
     const adText = useMemo(() => {
-        const text = "  ★  NFSU DELHI  ★  KREEDA MAHOTSAV 2.0  ★  TEAM PARAKRAM  ★  ";
+        const text = "  NFSU DELHI  ★  KREEDA MAHOTSAV 2.0  ★  TEAM PARAKRAM  ★  THIS WAY ---→  ★";
         return text.repeat(150); 
     }, []);
 
@@ -338,7 +338,7 @@ export default function Game() {
                         key={`crowd-${index}`}
                         src="/crowd.webp" 
                         alt="crowd"
-                        className={`h-full w-auto object-cover ${index % 2 !== 0 ? 'scale-x-[-1]' : ''}`}
+                        className="h-full w-auto object-cover"
                         style={{ marginRight: '-1px' }}
                     />
                 ))}
