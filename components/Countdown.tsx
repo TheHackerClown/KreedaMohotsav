@@ -38,15 +38,17 @@ const formatTimeParts = (ms: number) => {
 };
 
 export default function Countdown({ targetUtc, className }: CountdownProps) {
+	const [mounted, setMounted] = useState(false);
 	const [targetDate, setTargetDate] = useState<Date>(new Date(targetUtc));
 
 	useEffect(() => {
+		setMounted(true);
 		const date = new Date(targetUtc);
 		if (!Number.isNaN(date.getTime())) {
 			setTargetDate(date);
 		}
 	}, [targetUtc]);
-	
+
 	const [remainingMs, setRemainingMs] = useState(() =>
 		targetDate ? targetDate.getTime() - Date.now() : 0
 	);
@@ -66,6 +68,10 @@ export default function Countdown({ targetUtc, className }: CountdownProps) {
 
 		return () => window.clearInterval(intervalId);
 	}, [targetUtc]);
+
+	if (!mounted) {
+		return <span className={className}>Loading...</span>;
+	}
 
 	return (
 		<span className={`${className} ${!targetDate || remainingMs <= 0 ? 'text-red-700' : ''}`}>
