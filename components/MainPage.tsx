@@ -4,7 +4,7 @@ import MuteButton from "@/components/MuteButton";
 import EnterButton from "@/components/EnterButton";
 import RuleBookButton from "@/components/RuleBook";
 import AboutUsButton from "@/components/AboutUs";
-import Countdown from "@/components/Countdown";
+import LeaderboardButton from "@/components/Leaderboard";
 
 
 export default function MainPage() {
@@ -28,15 +28,15 @@ export default function MainPage() {
             <h1 className="text-[12px] sm:text-s md:text-3xl">Parakram Presents</h1>
             <h2 className="text-[12px] sm:text-s md:text-2xl">Kreeda Mohotsav 2.0</h2>
             <br />
-            <Countdown targetUtc="2026-02-10T17:00:00Z" className="text-xs sm:text-s md:text-xl m-4 border-red-600 border p-4 bg-black" />
+            <EnterButton onClick={clickHandle} className="w-11/12 flex justify-center-safe" />
             <br />
-            <EnterButton onClick={clickHandle} className="w-1/2 flex justify-center-safe" />
+            <MuteButton className="w-11/12 flex justify-center-safe" />
             <br />
-            <MuteButton className="w-1/2 flex justify-center-safe" />
+            <RuleBookButton className="w-11/12 flex justify-center-safe" />
             <br />
-            <RuleBookButton className="w-1/2 flex justify-center-safe" />
+            <LeaderboardButton className="w-11/12 flex justify-center-safe" />
             <br />
-            <AboutUsButton  className="w-1/2 flex justify-center-safe" />
+            <AboutUsButton  className="w-11/12 flex justify-center-safe" />
             </div>
         {/* Developer credits */}
       <div className="fixed bottom-2 right-2 text-right text-xs sm:text-sm text-gray-500 z-10" style={{ fontFamily: '"Press Start 2P", monospace' }}>
